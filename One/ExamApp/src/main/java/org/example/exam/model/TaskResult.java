@@ -1,23 +1,27 @@
 package org.example.exam.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-@SuppressWarnings("unused")
 public class TaskResult {
-    private final boolean correct;
-    private final List<String> errorList = new ArrayList<>();
+    private Map<Task, TaskResultDetail> details;
+    private int rate;
+    private int correct;
 
-    public TaskResult(boolean correct, List<String> errorList) {
+    public TaskResult(Map<Task, TaskResultDetail> details, int rate, int correct) {
+        this.details = details;
+        this.rate = rate;
         this.correct = correct;
-        this.errorList.addAll(errorList);
     }
 
-    public boolean isCorrect() {
+    public Map<Task, TaskResultDetail> getDetails() {
+        return details;
+    }
+
+    public int getRate() {
+        return rate;
+    }
+
+    public int getCorrect() {
         return correct;
-    }
-
-    public List<String> getErrorList() {
-        return errorList;
     }
 }

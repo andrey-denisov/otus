@@ -1,4 +1,12 @@
 application:
   dataFilePath: tasks.csv
-  entityClassName: org.example.exam.model.task.SelectionTask
-  locale: ru_RU
+  locale: ru-RU
+
+spring:
+  messages:
+    basename: i18/messages, i18/content
+    encoding: UTF-8
+
+
+
+

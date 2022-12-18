@@ -5,7 +5,6 @@ import org.example.exam.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class TaskService {
     }
 
     // получает из базы все задания, перемешивает и выбирает из них требуемое количество
-    public List<Task> loadTaskList(int amount) throws IOException {
+    public List<Task> loadTaskList(int amount) {
         List<Task> all = repository.getAll();
         if(null == all || all.isEmpty()) {
             return Collections.emptyList();

@@ -1,10 +1,10 @@
 package org.example.exam.service;
 
-import org.example.exam.model.TaskResult;
+import org.example.exam.model.TaskResultDetail;
 
 import java.util.Collection;
 
 // сервис выставления оценок по результатам экзамена
 public interface RateService {
-    int rate(Collection<TaskResult> taskResults);
+    int rate(Collection<TaskResultDetail> taskResultDetails);
 }

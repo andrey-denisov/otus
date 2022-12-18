@@ -34,5 +34,5 @@ public abstract class Task {
         return question;
     }
 
-    public abstract TaskResult checkAnswer(String answer);
+    public abstract TaskResultDetail checkAnswer(String answer);
 }

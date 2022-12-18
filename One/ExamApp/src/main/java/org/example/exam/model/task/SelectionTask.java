@@ -1,7 +1,7 @@
 package org.example.exam.model.task;
 
 import org.example.exam.model.Task;
-import org.example.exam.model.TaskResult;
+import org.example.exam.model.TaskResultDetail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,11 +32,11 @@ public class SelectionTask extends Task {
 
     // можно просто возвращать true/false, но собирать ошибки - задел на будущее расширение функционала.
     @Override
-    public TaskResult checkAnswer(String answer) {
+    public TaskResultDetail checkAnswer(String answer) {
         boolean correct = rightAnswer.equalsIgnoreCase(answer);
         if(correct) {
-            return new TaskResult(true, new ArrayList<>());
+            return new TaskResultDetail(true, new ArrayList<>());
         }
-        return  new TaskResult(false, Collections.singletonList(answer));
+        return  new TaskResultDetail(false, Collections.singletonList(answer));
     }
 }
