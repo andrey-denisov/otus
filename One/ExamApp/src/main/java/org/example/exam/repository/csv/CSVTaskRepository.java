@@ -9,7 +9,6 @@ import org.example.exam.model.task.SelectionTask;
 import org.example.exam.repository.TaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ResourceUtils;
@@ -22,17 +21,17 @@ public class CSVTaskRepository implements TaskRepository {
 
     private final Logger logger = LoggerFactory.getLogger(CSVTaskRepository.class);
 
-    private final CsvFileReader cvsFile;
+    private final CsvFileReader cvsFileReader;
     private final File file;
 
-    public CSVTaskRepository(@Qualifier("LocalizedCsvFileReader") CsvFileReader cvsFile, @Value("${application.dataFilePath}") String fileName) {
-        this.cvsFile = cvsFile;
+    public CSVTaskRepository(CsvFileReader cvsFileReader, @Value("${application.dataFilePath}") String fileName) {
+        this.cvsFileReader = cvsFileReader;
         this.file = file(fileName);
     }
 
     @Override
     public List<Task> getAll() {
-        byte[] content = String.join("\n", cvsFile.read(file)).getBytes();
+        byte[] content = String.join("\n", cvsFileReader.read(file)).getBytes();
 
         try {
             CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader();

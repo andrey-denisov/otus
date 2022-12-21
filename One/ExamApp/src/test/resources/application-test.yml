@@ -1,4 +1,0 @@
-application:
-  dataFilePath: tasks.csv
-  entityClassName: org.example.exam.model.task.SelectionTask
-  locale: en
