@@ -1,10 +1,10 @@
 application:
-  dataFilePath: tasks.csv
-  locale: ru-RU
+  dataFilePath: data
+  dataFileName: tasks.csv
 
 spring:
   messages:
-    basename: i18/messages, file:content
+    basename: i18/messages
     encoding: UTF-8
 
 

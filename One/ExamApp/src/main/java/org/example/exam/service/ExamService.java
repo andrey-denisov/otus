@@ -54,7 +54,7 @@ public class ExamService {
     }
 
     // реализует алгоритм проведения экзамена: запрашивает имя, задает вопросы, оценивает результат
-    private TaskResult passExam(List<Task> taskList) {
+    private TaskResult passExam(List<? extends Task> taskList) {
         try {
         Map<Task, TaskResultDetail> details = askExamQuestions(taskList);
         return new TaskResult(
@@ -68,7 +68,7 @@ public class ExamService {
         }
     }
 
-    private Map<Task, TaskResultDetail> askExamQuestions(List<Task> taskList) {
+    private Map<Task, TaskResultDetail> askExamQuestions(List<? extends Task> taskList) {
         Map<Task, TaskResultDetail> result = new HashMap<>();
         taskList.forEach(task -> {
             ioService.display(formatter.format(task));
@@ -101,8 +101,8 @@ public class ExamService {
         return ioService.getUserInput();
     }
 
-    private List<Task> loadTaskList(int taskAmount) {
-        List<Task> taskList = taskService.loadTaskList(taskAmount);
+    private List<? extends Task> loadTaskList(int taskAmount) {
+        List<? extends Task> taskList = taskService.loadTaskList(taskAmount);
         if (taskList.isEmpty()) {
             throw new LoadingTaskException("No task found");
         }

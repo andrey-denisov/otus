@@ -21,4 +21,8 @@ public class LocalizationHelper {
     public String message(String code, String defaultMessage) {
         return messageSource.getMessage(code, null, defaultMessage, locale);
     }
+
+    public Locale getLocale() {
+        return locale;
+    }
 }

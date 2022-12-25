@@ -1,7 +1,6 @@
 package org.example.exam.service;
 
 import org.example.exam.model.Task;
-import org.example.exam.model.task.SelectionTask;
 import org.example.exam.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,12 +27,12 @@ class TaskServiceTest {
     @Test
     void loadTaskListEnoughData() throws IOException {
         when(repository.getAll()).thenReturn(Arrays.asList(
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null)
+                new Task(1, null, null, null),
+                new Task(1, null, null, null),
+                new Task(1, null, null, null),
+                new Task(1, null, null, null),
+                new Task(1, null, null, null),
+                new Task(1, null, null, null)
                 ));
 
         List<Task> result = taskService.loadTaskList(5);
@@ -43,9 +42,9 @@ class TaskServiceTest {
     @Test
     void loadTaskListNotEnoughData() throws IOException {
         when(repository.getAll()).thenReturn(Arrays.asList(
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null),
-                new SelectionTask(1, null, null, null)
+                new Task(1, null, null, null),
+                new Task(1, null, null, null),
+                new Task(1, null, null, null)
                 ));
 
         List<Task> result = taskService.loadTaskList(5);

@@ -17,7 +17,7 @@ class CSVTaskRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        when(fileReader.read(Mockito.any())).thenReturn(
+        when(fileReader.read()).thenReturn(
                 Arrays.asList(
                         "id,question,rightAnswer,answers",
                         "1,Name of the first cosmonaut,Gagarin,Gagarin;Ivanov;Batareikin",
@@ -32,7 +32,7 @@ class CSVTaskRepositoryTest {
 
     @Test
     void getAll() {
-        List<Task> result = new CSVTaskRepository(fileReader, "tasks.csv").getAll();
+        List<Task> result = new CSVTaskRepository(fileReader).getAll();
         assertNotNull(result);
         assertEquals(6, result.size());
     }
