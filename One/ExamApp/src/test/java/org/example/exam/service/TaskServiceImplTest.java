@@ -2,6 +2,7 @@ package org.example.exam.service;
 
 import org.example.exam.model.Task;
 import org.example.exam.repository.TaskRepository;
+import org.example.exam.service.impl.TaskServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,15 +14,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class TaskServiceTest {
+class TaskServiceImplTest {
 
     private TaskRepository repository;
-    private TaskService taskService;
+    private TaskServiceImpl taskService;
 
     @BeforeEach
     void setUp() {
         repository = Mockito.mock(TaskRepository.class);
-        taskService = new TaskService(repository);
+        taskService = new TaskServiceImpl(repository);
     }
 
     @Test

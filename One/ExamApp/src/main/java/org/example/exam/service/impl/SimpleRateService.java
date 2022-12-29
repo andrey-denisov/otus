@@ -1,6 +1,7 @@
-package org.example.exam.service;
+package org.example.exam.service.impl;
 
 import org.example.exam.model.TaskResultDetail;
+import org.example.exam.service.RateService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import java.util.Collection;
 // простейшая реализация сервиса выставления оценок
 @Component
 @Qualifier("SimpleRateSerivce")
-public class SimpleRateService implements RateService{
+public class SimpleRateService implements RateService {
 
     @Override
     public int rate(Collection<TaskResultDetail> taskResultDetails) {

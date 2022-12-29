@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// абстрактный родительский класс задачи. Хранит в себе id, вопрос и ответ. От него наследуются
-// классы конкретных задач. Для примера сделан класс с несколькими вариантами ответов.
 @SuppressWarnings("unused")
 public class Task {
     private long id;
