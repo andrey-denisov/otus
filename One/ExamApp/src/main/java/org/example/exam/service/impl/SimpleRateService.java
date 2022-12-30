@@ -2,28 +2,30 @@ package org.example.exam.service.impl;
 
 import org.example.exam.model.TaskResultDetail;
 import org.example.exam.service.RateService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Map;
 
-// простейшая реализация сервиса выставления оценок
 @Component
-@Qualifier("SimpleRateSerivce")
+@ConfigurationProperties(prefix = "application")
 public class SimpleRateService implements RateService {
+
+    private Map<String, Integer> incorrectAnswersCountToMark;
+
+    public void setIncorrectAnswersCountToMark(Map<String, Integer> incorrectAnswersCountToMark) {
+        this.incorrectAnswersCountToMark = incorrectAnswersCountToMark;
+    }
 
     @Override
     public int rate(Collection<TaskResultDetail> taskResultDetails) {
         final long incorrect = taskResultDetails.stream().filter(r -> !r.isCorrect()).count();
-        if(incorrect == 0){
-            return 5;
+        Integer mark = incorrectAnswersCountToMark.get(String.valueOf(incorrect));
+        if (mark == null) {
+            return incorrectAnswersCountToMark.get("default");
         }
-        if(incorrect == 1) {
-            return 4;
-        }
-        if(incorrect == 2) {
-            return 3;
-        }
-        return 2;
+        return mark;
     }
+
 }

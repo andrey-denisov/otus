@@ -4,14 +4,13 @@ import org.example.exam.exception.ExamExecutionException;
 import org.example.exam.exception.LoadingTaskException;
 import org.example.exam.format.task.TaskFormatter;
 import org.example.exam.io.IOService;
-import org.example.exam.localization.MessageSourceWrapper;
+import org.example.exam.localization.MessageLocalizationService;
 import org.example.exam.model.TaskResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.example.exam.model.Task;
 import org.example.exam.model.TaskResultDetail;
 
-import java.text.MessageFormat;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class ExamService {
 
     private final Logger logger = LoggerFactory.getLogger(ExamService.class);
 
-    private final MessageSourceWrapper messageSourceWrapper;
+    private final MessageLocalizationService messageLocalizationService;
 
     private final TaskService taskService;
     private final IOService ioService;
@@ -30,11 +29,11 @@ public class ExamService {
 
     private final int taskAmount;
 
-    public ExamService(TaskService taskService, IOService ioService, RateService rateSerivce, TaskFormatter  formatter, MessageSourceWrapper messageSourceWrapper, @Value("${taskAmount:5}") int taskAmount) {
+    public ExamService(TaskService taskService, IOService ioService, RateService rateSerivce, TaskFormatter  formatter, MessageLocalizationService messageLocalizationService, @Value("${taskAmount:5}") int taskAmount) {
         this.taskService = taskService;
         this.rateSerivce = rateSerivce;
         this.formatter = formatter;
-        this.messageSourceWrapper = messageSourceWrapper;
+        this.messageLocalizationService = messageLocalizationService;
         this.taskAmount = taskAmount;
         this.ioService = ioService;
     }
@@ -48,7 +47,7 @@ public class ExamService {
             displayResult(studentName, result.getRate(), result.getCorrect(), result.getDetails().size());
         } catch (ExamExecutionException e) {
             logger.error(e.getMessage());
-            String msg = messageSourceWrapper.message("something_went_wrong", "Sonething went wrong");
+            String msg = messageLocalizationService.message("something_went_wrong", "Sonething went wrong");
             ioService.display(msg);
         }
     }
@@ -80,9 +79,7 @@ public class ExamService {
     }
 
     private void displayResult(String studentName, int rate, long correct, int total) {
-        String msg = MessageFormat.format(
-                messageSourceWrapper.message("test_result", "{0}, Your rate is: {1}. Correct done {2} tasks of {3}"),
-                studentName, rate, correct, total);
+        String msg = messageLocalizationService.message("test_result", "{0}, Your rate is: {1}. Correct done {2} tasks of {3}", studentName, rate, correct, total);
         ioService.display(msg);
     }
 
@@ -91,14 +88,13 @@ public class ExamService {
     }
 
     private void displayGreeting(String studentName) {
-        String greetingMessage = MessageFormat.format(messageSourceWrapper.message("greeting_message", "Hello {0}"), studentName);
+        String greetingMessage = messageLocalizationService.message("greeting_message", "Hello {0}", studentName);
         ioService.display(greetingMessage);
         ioService.display("\n");
     }
 
     private String inputStudentName() {
-        ioService.display(messageSourceWrapper.message("type_your_name", "Type your name"));
-//        ioService.display(new String(localizationHelper.message("type_your_name", "Type your name").getBytes(), StandardCharsets.UTF_8));
+        ioService.display(messageLocalizationService.message("type_your_name", "Type your name"));
         return ioService.getUserInput();
     }
 

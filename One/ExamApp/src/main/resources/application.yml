@@ -1,7 +1,11 @@
 application:
   dataFilePath: data
   dataFileName: tasks.csv
-
+  incorrectAnswersCountToMark:
+    0: 5
+    1: 4
+    2: 3
+    default: 2
 spring:
   messages:
     basename: i18/messages
