@@ -26,7 +26,7 @@ public class AuthorRepositoryJdbc implements AuthorRepository {
     @Override
     public List<Author> findAll() {
         final String sql = "SELECT ID, NAME FROM AUTHOR";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Author(rs.getLong("id"), rs.getString("name")));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Author(rs.getLong("id"), new String(rs.getString("name").getBytes(), StandardCharsets.UTF_8)));
     }
 
     @Override

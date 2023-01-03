@@ -34,7 +34,7 @@ public class GenreRepositoryJdbc implements GenreRepository {
                         "FROM BOOK_GENRE BG " +
                         "INNER JOIN GENRE G ON G.ID = BG.GENRE_ID " +
                         "WHERE BG.BOOK_ID=:book_id";
-        return jdbcTemplate.query(sql, new HashMap<String, Long>() {{ put("book_id", bookId); }}, (rs, rowNum) -> new Genre(rs.getLong("ID"), rs.getString("NAME")));
+        return jdbcTemplate.query(sql, new HashMap<String, Long>() {{ put("book_id", bookId); }}, (rs, rowNum) -> new Genre(rs.getLong("ID"), new String(rs.getString("NAME").getBytes(), StandardCharsets.UTF_8)));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class GenreRepositoryJdbc implements GenreRepository {
         try {
             Genre genre = jdbcTemplate.queryForObject(sql, new HashMap<String, Long>() {{
                 put("id", id);
-            }}, (rs, rowNum) -> new Genre(rs.getLong("id"), rs.getString("name")));
+            }}, (rs, rowNum) -> new Genre(rs.getLong("id"), new String(rs.getString("name").getBytes(), StandardCharsets.UTF_8)));
             return Optional.ofNullable(genre);
         }
         catch (EmptyResultDataAccessException e) {

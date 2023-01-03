@@ -14,6 +14,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -137,12 +138,12 @@ public class BookRepositoryJdbc implements BookRepository {
                     book = new Book();
                     book.setId(rs.getLong("id"));
                     book.setIsbn(rs.getString("isbn"));
-                    book.setTitle(rs.getString("title"));
+                    book.setTitle(new String(rs.getString("title").getBytes(), StandardCharsets.UTF_8));
                     book.setIssueYear(rs.getInt("issue_year"));
-                    book.setAuthor(new Author(rs.getLong("author_id"), rs.getString("author_name")));
+                    book.setAuthor(new Author(rs.getLong("author_id"), new String(rs.getString("author_name").getBytes(), StandardCharsets.UTF_8)));
                     books.put(bookId, book);
                 }
-                book.getGenres().add(new Genre(rs.getLong("genre_id"), rs.getString("genre_name")));
+                book.getGenres().add(new Genre(rs.getLong("genre_id"), new String(rs.getString("genre_name").getBytes(), StandardCharsets.UTF_8)));
             }
             return new ArrayList<>(books.values());
         }
