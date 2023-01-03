@@ -1,16 +1,15 @@
-package com.example.books.dao.impl;
+package com.example.books.dao.jdbc;
 
-import com.example.books.dao.AuthorRepository;
 import com.example.books.dao.GenreRepository;
 import com.example.books.model.Author;
 import com.example.books.model.Book;
 import com.example.books.model.Genre;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,21 +18,19 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
-@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
-class BookRepositoryImplTest {
+@JdbcTest(properties = "spring.shell.interactive.enabled=false")
+@ComponentScan(basePackages = "com.example.books.dao.jdbc")
+class BookRepositoryJdbcTest {
 
     @Autowired
-    private BookRepositoryImpl bookRepository;
-
-    @Autowired
-    private AuthorRepository authorRepository;
+    private BookRepositoryJdbc bookRepository;
 
     @Autowired
     private GenreRepository genreRepository;
 
     @Test
     void getAll() {
-        List<Book> bookList = bookRepository.getAll();
+        List<Book> bookList = bookRepository.findAll();
         assertEquals(3, bookList.size());
         System.out.println(bookList);
         List<Book> fandorin = bookList.stream().filter(b -> "12345678".equals(b.getIsbn())).collect(Collectors.toList());
@@ -42,22 +39,22 @@ class BookRepositoryImplTest {
     }
 
     @Test
-    void addBookTestOk() throws SQLException {
+    void addBookTestOk() {
         Book book = new Book();
-        book.setAuthor(authorRepository.findAll().get(0));
+        book.setAuthor(new Author(1, "Борис Акунин"));
         book.setTitle("The book");
         book.setIsbn("1234");
         book.setIssueYear(1990);
         book.setGenres(new HashSet<>(Arrays.asList(new Genre(1L, "Fiction"), new Genre(2L, "Science"))));
 
-        List<Book> before = bookRepository.getAll();
+        List<Book> before = bookRepository.findAll();
         assertEquals(3, before.size());
         assertNull(book.getId());
-        Book added = bookRepository.add(book);
+        Book added = bookRepository.add(book).get();
         assertNotNull(added.getId());
-        List<Book> after = bookRepository.getAll();
+        List<Book> after = bookRepository.findAll();
         assertEquals(4, after.size());
-        List<Genre> genres = genreRepository.byBookId(added.getId());
+        List<Genre> genres = genreRepository.findByBookId(added.getId());
         assertEquals(2, genres.size());
     }
 
@@ -72,30 +69,30 @@ class BookRepositoryImplTest {
             book.setGenres(new HashSet<>(Arrays.asList(null, new Genre(2L, "Science"))));
 
             assertNull(book.getId());
-            Book added = bookRepository.add(book);
+            Book added = bookRepository.add(book).get();
         } catch (Exception e) {
 
         }
-        List<Book> after = bookRepository.getAll();
+        List<Book> after = bookRepository.findAll();
         assertEquals(3, after.size());
     }
 
     @Test
     void delete() {
-        List<Genre> genresBefore = genreRepository.byBookId(1);
+        List<Genre> genresBefore = genreRepository.findByBookId(1);
         assertFalse(genresBefore.isEmpty());
-        assertNotNull(bookRepository.byId(1));
+        assertTrue(bookRepository.findById(1).isPresent());
         bookRepository.delete(1);
-        assertNull(bookRepository.byId(1));
-        List<Genre> genresAfter = genreRepository.byBookId(1);
+        assertFalse(bookRepository.findById(1).isPresent());
+        List<Genre> genresAfter = genreRepository.findByBookId(1);
         assertTrue(genresAfter.isEmpty());
     }
 
     @Test
     void getById() {
-        List<Book> bookList = bookRepository.getAll();
+        List<Book> bookList = bookRepository.findAll();
         Book toFind = bookList.get(0);
-        Book foundById = bookRepository.byId(toFind.getId());
+        Book foundById = bookRepository.findById(toFind.getId()).get();
         assertEquals(toFind, foundById);
     }
 }
