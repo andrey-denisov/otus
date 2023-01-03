@@ -5,3 +5,6 @@ spring:
     password: password
     driverClassName: org.h2.Driver
 
+  sql:
+    init:
+      data-locations: test-data.sql

@@ -2,18 +2,17 @@ package com.example.books.dao;
 
 import com.example.books.model.Book;
 
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookRepository {
-    Book add(Book book) throws SQLException;
+    Optional<Book> add(Book book);
 
     void update(Book Book);
 
     void delete(long id);
 
-    List<Book> getAll();
+    List<Book> findAll();
 
-    Book byId(long id);
-
+    Optional<Book> findById(long id);
 }

@@ -2,7 +2,9 @@ package com.example.books.util;
 
 import com.example.books.model.Book;
 import com.example.books.model.Genre;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BookFormatter implements Formatter<Book>{
     @Override
     public String format(Book value) {

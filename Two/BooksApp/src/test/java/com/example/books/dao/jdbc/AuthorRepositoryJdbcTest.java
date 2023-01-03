@@ -1,24 +1,26 @@
-package com.example.books.dao.impl;
+package com.example.books.dao.jdbc;
 
-import com.example.books.dao.AuthorRepository;
 import com.example.books.model.Author;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
-@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
-class AuthorRepositoryImplTest {
+@JdbcTest(properties = "spring.shell.interactive.enabled=false")
+@ComponentScan(basePackages = "com.example.books.dao.jdbc")
+class AuthorRepositoryJdbcTest {
 
     @Autowired
-    private AuthorRepository authorRepository;
+    private AuthorRepositoryJdbc authorRepository;
 
     @Test
     void getAll() {
@@ -28,15 +30,15 @@ class AuthorRepositoryImplTest {
 
     @Test
     void byId() {
-        Author result = authorRepository.findById(1L);
-        assertEquals("Борис Акунин", result.getName());
+        Optional<Author> result = authorRepository.findById(1L);
+        assertEquals("Борис Акунин", result.get().getName());
     }
 
     @Test
     void createOk() {
         List<Author> before = authorRepository.findAll();
         assertEquals(2, before.size());
-        authorRepository.create("Pushkin");
+        authorRepository.add("Pushkin");
         List<Author> after = authorRepository.findAll();
         assertEquals(3, after.size());
     }
@@ -45,12 +47,12 @@ class AuthorRepositoryImplTest {
     void createFail() {
         List<Author> before = authorRepository.findAll();
         assertEquals(2, before.size());
-        authorRepository.create("Pushkin");
+        authorRepository.add("Pushkin");
         List<Author> afterSuccess = authorRepository.findAll();
         assertEquals(3, afterSuccess.size());
 
         DuplicateKeyException thrown = assertThrows(DuplicateKeyException.class, () -> {
-            authorRepository.create("Pushkin");
+            authorRepository.add("Pushkin");
         }, "DuplicateKeyException was expected");
 
         List<Author> afterFail = authorRepository.findAll();
@@ -73,7 +75,7 @@ class AuthorRepositoryImplTest {
 
     @Test
     void deleteBydOk() {
-        Author pushkin = authorRepository.create("Pushkin");
+        Author pushkin = authorRepository.add("Pushkin").get();
         List<Author> before = authorRepository.findAll();
         assertEquals(3, before.size());
         assertNotNull(authorRepository.findById(pushkin.getId()));
@@ -82,6 +84,6 @@ class AuthorRepositoryImplTest {
 
         List<Author> after = authorRepository.findAll();
         assertEquals(2, after.size());
-        assertNull(authorRepository.findById(pushkin.getId()));
+        assertFalse(authorRepository.findById(pushkin.getId()).isPresent());
     }
 }

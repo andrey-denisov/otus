@@ -1,6 +1,6 @@
 create table if not exists author
 (
-    id bigint auto_increment primary key
+    id bigint auto_increment
     primary key,
     name varchar(200) not null UNIQUE
 );
