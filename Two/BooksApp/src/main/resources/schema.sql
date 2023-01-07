@@ -26,7 +26,7 @@ ALTER TABLE book ADD CONSTRAINT book_author_id_fk foreign key (author_id) refere
 create table if not exists book_genre
 (
     id bigint auto_increment primary key,
-    book_id integer not null constraint book_id_fk references book on delete no action on delete cascade,
+    book_id integer not null constraint book_id_fk references book on delete cascade,
     genre_id integer not null constraint genre_id_fk references genre on delete no action
 );
 

@@ -5,56 +5,53 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
-@JdbcTest(properties = "spring.shell.interactive.enabled=false")
-@ComponentScan(basePackages = "com.example.books.dao.jdbc")
+@JdbcTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {GenreRepositoryJdbc.class}))
 class GenreRepositoryJdbcTest {
 
     @Autowired
     private GenreRepositoryJdbc genreRepository;
 
     @Test
-    void getAll() {
+    void shouldReturnAllGenresList() {
         List<Genre> result = genreRepository.findAll();
-        assertEquals(4, result.size());
+        assertThat(result.size()).isEqualTo(4);
     }
 
     @Test
-    void byBookId() {
+    void shouldReturnBookById() {
         List<Genre> genres = genreRepository.findByBookId(1L);
-        assertEquals(2, genres.size());
+        assertThat(genres.size()).isEqualTo(2);
     }
 
     @Test
-    void deleteById_Fail() {
+    void shouldFailWhileDeletingGenreById() {
         List<Genre> genresBefore = genreRepository.findByBookId(1L);
-        assertEquals(2, genresBefore.size());
+        assertThat(genresBefore.size()).isEqualTo(2);
         long toDelete = genresBefore.get(0).getId();
 
-        DataIntegrityViolationException thrown = assertThrows(DataIntegrityViolationException.class, () -> {
-            genreRepository.deleteById(toDelete);
-        }, "DataIntegrityViolationException was expected");
+        assertThatThrownBy(() -> genreRepository.deleteById(toDelete)).isInstanceOf(DataIntegrityViolationException.class);
 
         List<Genre> genresAfter = genreRepository.findByBookId(1L);
-        assertEquals(2, genresBefore.size());
+        assertThat(genresAfter.size()).isEqualTo(2);
 
-        Genre genreAfter = genreRepository.findById(toDelete).get();
-        assertNotNull(genreAfter);
+        Optional<Genre> genreAfter = genreRepository.findById(toDelete);
+        assertThat(genreAfter).isPresent();
     }
 
     @Test
-    void deleteById_Ok() {
+    void shouldDeleteGenreById() {
         Optional<Genre> genre = genreRepository.findAll().stream().filter(g -> g.getName().equals("Детская литература")).findFirst();
-        assertTrue(genre.isPresent());
+        assertThat(genre).isPresent();
         long id = genre.get().getId();
         genreRepository.deleteById(id);
-
-        assertFalse(genreRepository.findById(id).isPresent());
+        assertThat(genreRepository.findById(id)).isNotPresent();
     }
 }

@@ -2,6 +2,7 @@ package com.example.books.dao.jdbc;
 
 import com.example.books.dao.GenreRepository;
 import com.example.books.model.Genre;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,14 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Repository
 public class GenreRepositoryJdbc implements GenreRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-
-    public GenreRepositoryJdbc(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public List<Genre> findAll() {

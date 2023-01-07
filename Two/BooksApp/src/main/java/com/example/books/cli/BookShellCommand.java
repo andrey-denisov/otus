@@ -3,55 +3,45 @@ package com.example.books.cli;
 import com.example.books.model.Book;
 import com.example.books.model.Genre;
 import com.example.books.service.BookService;
-import com.example.books.service.GenreService;
+import com.example.books.service.impl.GenreServiceImpl;
 import com.example.books.util.BookFormatter;
 import com.example.books.service.AuthorService;
+import com.example.books.util.ListFormatter;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellComponent;
+import org.springframework.util.CollectionUtils;
 
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("unused")
+@RequiredArgsConstructor
 @ShellComponent
 public class BookShellCommand {
 
     private final Logger logger = LoggerFactory.getLogger(BookShellCommand.class);
-
     private final BookService bookService;
-    private final GenreService genreService;
+    private final GenreServiceImpl genreService;
     private final AuthorService authorService;
-
     private final BookFormatter bookFormatter;
-
-    public BookShellCommand(BookService bookService, AuthorService authorService, GenreService genreService, BookFormatter bookFormatter) {
-        this.bookService = bookService;
-        this.authorService = authorService;
-        this.genreService = genreService;
-        this.bookFormatter = bookFormatter;
-    }
 
     @ShellMethod(value = "List of books", key="list-books")
     public String bookList() {
         try {
             List<Book> bookList = bookService.findAll();
-            if (null == bookList || bookList.isEmpty()) {
+            if (CollectionUtils.isEmpty(bookList)) {
                 return "No books found";
             }
 
-            StringBuilder sb = new StringBuilder(" List of books:").append("\n");
-            for (Book b : bookList) {
-                sb.append(bookFormatter.format(b)).append("\n\n");
-            }
-
-            return sb.toString();
+            return ListFormatter.format(bookList, bookFormatter, "\n");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return "Невозможно получить список книг: " + e.getMessage();
+            return "Cannot obtain list of books: " + e.getMessage();
         }
     }
 
@@ -59,16 +49,14 @@ public class BookShellCommand {
     public String bookByID(long id) {
         try {
             Book book = bookService.findById(id);
-
-            if (book == null) {
-                return MessageFormat.format("Book with id={0} not found", id);
+            if (Objects.isNull(book)) {
+                return String.format("Book with id=%d not found", id);
             }
-
-            return new BookFormatter().format(book);
+            return bookFormatter.format(book);
         }
         catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return "Невозможно получить книгу по id: " + e.getMessage();
+            return "Cannot get book by id: " + e.getMessage();
         }
     }
 
@@ -85,16 +73,16 @@ public class BookShellCommand {
             String[] genreIdArray = genreId.split(",");
             for (String s : genreIdArray) {
                 Genre genre = genreService.findById(Long.parseLong(s));
-                if(null != genre) {
+                if(Objects.nonNull(genre)) {
                     genres.add(genre);
                 }
             }
             book.setGenres(genres);
 
-            return new BookFormatter().format(bookService.add(book));
+            return bookFormatter.format(bookService.add(book));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return "Невозможно добавить книгу: " + e.getMessage();
+            return "Cannot add a book: " + e.getMessage();
         }
     }
 

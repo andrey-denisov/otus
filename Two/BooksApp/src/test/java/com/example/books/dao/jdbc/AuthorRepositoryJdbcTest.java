@@ -5,85 +5,75 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.transaction.annotation.Transactional;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@Transactional
-@JdbcTest(properties = "spring.shell.interactive.enabled=false")
-@ComponentScan(basePackages = "com.example.books.dao.jdbc")
+@JdbcTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AuthorRepositoryJdbc.class))
 class AuthorRepositoryJdbcTest {
 
     @Autowired
     private AuthorRepositoryJdbc authorRepository;
 
     @Test
-    void getAll() {
+    void shouldReturnAllAuthorsList() {
         List<Author> result = authorRepository.findAll();
-        assertEquals(2, result.size());
+        assertThat(result.size()).isEqualTo(2);
     }
 
     @Test
-    void byId() {
+    void shouldReturnAuthorById() {
         Optional<Author> result = authorRepository.findById(1L);
-        assertEquals("Борис Акунин", result.get().getName());
+        assertThat(result).isPresent();
+        assertThat(result.get().getName()).isEqualTo("Борис Акунин");
     }
 
     @Test
-    void createOk() {
+    void shouldAddAuthorToDatabase() {
         List<Author> before = authorRepository.findAll();
-        assertEquals(2, before.size());
+        assertThat(before.size()).isEqualTo(2);
         authorRepository.add("Pushkin");
         List<Author> after = authorRepository.findAll();
-        assertEquals(3, after.size());
+        assertThat(after.size()).isEqualTo(3);
     }
 
     @Test
-    void createFail() {
+    void shouldFailWhenTryingToAddAuthorBecauseOfKeyDuplication() {
         List<Author> before = authorRepository.findAll();
-        assertEquals(2, before.size());
+        assertThat(before.size()).isEqualTo(2);
         authorRepository.add("Pushkin");
         List<Author> afterSuccess = authorRepository.findAll();
-        assertEquals(3, afterSuccess.size());
-
-        DuplicateKeyException thrown = assertThrows(DuplicateKeyException.class, () -> {
-            authorRepository.add("Pushkin");
-        }, "DuplicateKeyException was expected");
-
+        assertThat(afterSuccess.size()).isEqualTo(3);
+        assertThatThrownBy(() -> authorRepository.add("Pushkin")).isInstanceOf(DuplicateKeyException.class);
         List<Author> afterFail = authorRepository.findAll();
-        assertEquals(3, afterFail.size());
+        assertThat(afterFail.size()).isEqualTo(3);
     }
 
     @Test
-    void deleteBydFail() {
+    void shouldFailWhenDeletingAuthorByIdBecauseIntegrityViolation() {
         List<Author> before = authorRepository.findAll();
-        assertEquals(2, before.size());
-        DataIntegrityViolationException thrown = assertThrows(DataIntegrityViolationException.class, () -> {
-            authorRepository.deleteById(1L);
-        }, "DataIntegrityViolationException was expected");
-
-
-
+        assertThat(before.size()).isEqualTo(2);
+        assertThatThrownBy(() -> authorRepository.deleteById(1L)).isInstanceOf(DataIntegrityViolationException.class);
         List<Author> after = authorRepository.findAll();
-        assertEquals(2, after.size());
+        assertThat(after.size()).isEqualTo(2);
     }
 
     @Test
-    void deleteBydOk() {
-        Author pushkin = authorRepository.add("Pushkin").get();
+    void shouldDeleteAuthorById() {
+        Optional<Author> pushkin = authorRepository.add("Pushkin");
         List<Author> before = authorRepository.findAll();
-        assertEquals(3, before.size());
-        assertNotNull(authorRepository.findById(pushkin.getId()));
+        assertThat(pushkin).isPresent();
+        assertThat(before.size()).isEqualTo(3);
+        assertThat(authorRepository.findById(pushkin.get().getId())).isNotNull();
 
-        authorRepository.deleteById(pushkin.getId());
+        authorRepository.deleteById(pushkin.get().getId());
 
         List<Author> after = authorRepository.findAll();
-        assertEquals(2, after.size());
-        assertFalse(authorRepository.findById(pushkin.getId()).isPresent());
+        assertThat(after.size()).isEqualTo(2);
+        assertThat(authorRepository.findById(pushkin.get().getId()).isPresent()).isFalse();
     }
 }

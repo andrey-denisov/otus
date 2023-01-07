@@ -2,7 +2,9 @@ package com.example.books.dao.jdbc;
 
 import com.example.books.dao.AuthorRepository;
 import com.example.books.model.Author;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -10,23 +12,22 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Repository
 public class AuthorRepositoryJdbc implements AuthorRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public AuthorRepositoryJdbc(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
     public List<Author> findAll() {
         final String sql = "SELECT ID, NAME FROM AUTHOR";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Author(rs.getLong("id"), new String(rs.getString("name").getBytes(), StandardCharsets.UTF_8)));
+        return jdbcTemplate.query(sql, new AuthorRowMapper());
     }
 
     @Override
@@ -43,7 +44,7 @@ public class AuthorRepositoryJdbc implements AuthorRepository {
     public Optional<Author> findById(long id) {
         final String sql = "SELECT ID, NAME FROM AUTHOR WHERE ID=:id";
         try {
-            return Optional.of(jdbcTemplate.queryForObject(sql, new HashMap<String, Long>() {{ put("id", id); }}, (rs, rowNum) -> new Author(rs.getLong("id"), new String(rs.getString("name").getBytes(), StandardCharsets.UTF_8))));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Map.of("id", id), new AuthorRowMapper()));
         }
         catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -61,8 +62,16 @@ public class AuthorRepositoryJdbc implements AuthorRepository {
 
     @Override
     public void deleteById(long id) {
-        final String deleteAuthorSql = "delete from Author where id = :id";
+        final String deleteAuthorSql = "DELETE FROM AUTHOR WHERE id = :id";
         MapSqlParameterSource parameterSourceAuthor = new MapSqlParameterSource("id", id);
         jdbcTemplate.update(deleteAuthorSql, parameterSourceAuthor);
     }
+
+    private static class AuthorRowMapper implements RowMapper<Author> {
+        @Override
+        public Author mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new Author(rs.getLong("id"), new String(rs.getString("name").getBytes(), StandardCharsets.UTF_8));
+        }
+    }
+
 }
