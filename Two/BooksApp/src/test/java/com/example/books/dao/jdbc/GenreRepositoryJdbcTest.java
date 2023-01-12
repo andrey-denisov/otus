@@ -21,26 +21,31 @@ class GenreRepositoryJdbcTest {
 
     @Test
     void shouldReturnAllGenresList() {
+        final int initialGenresAmount = 4;
         List<Genre> result = genreRepository.findAll();
-        assertThat(result.size()).isEqualTo(4);
+        assertThat(result.size()).isEqualTo(initialGenresAmount);
     }
 
     @Test
     void shouldReturnBookById() {
-        List<Genre> genres = genreRepository.findByBookId(1L);
-        assertThat(genres.size()).isEqualTo(2);
+        final long bookId = 1L;
+        final int genresAmount = 2;
+        List<Genre> genres = genreRepository.findByBookId(bookId);
+        assertThat(genres.size()).isEqualTo(genresAmount);
     }
 
     @Test
     void shouldFailWhileDeletingGenreById() {
-        List<Genre> genresBefore = genreRepository.findByBookId(1L);
-        assertThat(genresBefore.size()).isEqualTo(2);
+        final long bookId = 1L;
+        final int initialAmount = 2;
+        List<Genre> genresBefore = genreRepository.findByBookId(bookId);
+        assertThat(genresBefore.size()).isEqualTo(initialAmount);
         long toDelete = genresBefore.get(0).getId();
 
         assertThatThrownBy(() -> genreRepository.deleteById(toDelete)).isInstanceOf(DataIntegrityViolationException.class);
 
-        List<Genre> genresAfter = genreRepository.findByBookId(1L);
-        assertThat(genresAfter.size()).isEqualTo(2);
+        List<Genre> genresAfter = genreRepository.findByBookId(bookId);
+        assertThat(genresAfter.size()).isEqualTo(initialAmount);
 
         Optional<Genre> genreAfter = genreRepository.findById(toDelete);
         assertThat(genreAfter).isPresent();
@@ -48,7 +53,8 @@ class GenreRepositoryJdbcTest {
 
     @Test
     void shouldDeleteGenreById() {
-        Optional<Genre> genre = genreRepository.findAll().stream().filter(g -> g.getName().equals("Детская литература")).findFirst();
+        final String genreName = "Детская литература";
+        Optional<Genre> genre = genreRepository.findAll().stream().filter(g -> g.getName().equals(genreName)).findFirst();
         assertThat(genre).isPresent();
         long id = genre.get().getId();
         genreRepository.deleteById(id);

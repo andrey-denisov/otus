@@ -63,28 +63,11 @@ public class BookShellCommand {
     @ShellMethod(value = "Add a books", key="add-book")
     public String addBook(String title, String isbn, int issued, long authorId, String genreId ) {
         try {
-            Book book = new Book();
-            book.setTitle(title);
-            book.setIssueYear(issued);
-            book.setIsbn(isbn);
-            book.setAuthor(authorService.findById(1L));
-
-            Set<Genre> genres = new HashSet<>();
-            String[] genreIdArray = genreId.split(",");
-            for (String s : genreIdArray) {
-                Genre genre = genreService.findById(Long.parseLong(s));
-                if(Objects.nonNull(genre)) {
-                    genres.add(genre);
-                }
-            }
-            book.setGenres(genres);
-
-            return bookFormatter.format(bookService.add(book));
+            Book book = bookService.add(title, isbn, issued, authorId, genreId.split(", "));
+            return bookFormatter.format(book);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return "Cannot add a book: " + e.getMessage();
         }
     }
-
-
 }

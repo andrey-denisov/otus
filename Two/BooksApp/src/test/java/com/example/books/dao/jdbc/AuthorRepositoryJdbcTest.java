@@ -21,59 +21,72 @@ class AuthorRepositoryJdbcTest {
 
     @Test
     void shouldReturnAllAuthorsList() {
+        final int initialAmount = 2;
         List<Author> result = authorRepository.findAll();
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.size()).isEqualTo(initialAmount);
     }
 
     @Test
     void shouldReturnAuthorById() {
-        Optional<Author> result = authorRepository.findById(1L);
+        final long akuninId = 1L;
+        Optional<Author> result = authorRepository.findById(akuninId);
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("Борис Акунин");
     }
 
     @Test
     void shouldAddAuthorToDatabase() {
+        final int initialAmount = 2;
+        final int finalAmount = 3;
+        final String newAuthorName = "Pushkin";
         List<Author> before = authorRepository.findAll();
-        assertThat(before.size()).isEqualTo(2);
-        authorRepository.add("Pushkin");
+        assertThat(before.size()).isEqualTo(initialAmount);
+        authorRepository.add(newAuthorName);
         List<Author> after = authorRepository.findAll();
-        assertThat(after.size()).isEqualTo(3);
+        assertThat(after.size()).isEqualTo(finalAmount);
     }
 
     @Test
     void shouldFailWhenTryingToAddAuthorBecauseOfKeyDuplication() {
+        final int initialAmount = 2;
+        final int finalAmount = 3;
+        final String newAuthorName = "Pushkin";
         List<Author> before = authorRepository.findAll();
-        assertThat(before.size()).isEqualTo(2);
-        authorRepository.add("Pushkin");
+        assertThat(before.size()).isEqualTo(initialAmount);
+        authorRepository.add(newAuthorName);
         List<Author> afterSuccess = authorRepository.findAll();
-        assertThat(afterSuccess.size()).isEqualTo(3);
-        assertThatThrownBy(() -> authorRepository.add("Pushkin")).isInstanceOf(DuplicateKeyException.class);
+        assertThat(afterSuccess.size()).isEqualTo(finalAmount);
+        assertThatThrownBy(() -> authorRepository.add(newAuthorName)).isInstanceOf(DuplicateKeyException.class);
         List<Author> afterFail = authorRepository.findAll();
-        assertThat(afterFail.size()).isEqualTo(3);
+        assertThat(afterFail.size()).isEqualTo(finalAmount);
     }
 
     @Test
     void shouldFailWhenDeletingAuthorByIdBecauseIntegrityViolation() {
+        final int initialAmount = 2;
+        final long akuninId = 1L;
         List<Author> before = authorRepository.findAll();
-        assertThat(before.size()).isEqualTo(2);
-        assertThatThrownBy(() -> authorRepository.deleteById(1L)).isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(before.size()).isEqualTo(initialAmount);
+        assertThatThrownBy(() -> authorRepository.deleteById(akuninId)).isInstanceOf(DataIntegrityViolationException.class);
         List<Author> after = authorRepository.findAll();
-        assertThat(after.size()).isEqualTo(2);
+        assertThat(after.size()).isEqualTo(initialAmount);
     }
 
     @Test
     void shouldDeleteAuthorById() {
-        Optional<Author> pushkin = authorRepository.add("Pushkin");
+        final int initialAmount = 2;
+        final int finalAmount = 3;
+        final String newAuthorName = "Pushkin";
+        Optional<Author> pushkin = authorRepository.add(newAuthorName);
         List<Author> before = authorRepository.findAll();
         assertThat(pushkin).isPresent();
-        assertThat(before.size()).isEqualTo(3);
+        assertThat(before.size()).isEqualTo(finalAmount);
         assertThat(authorRepository.findById(pushkin.get().getId())).isNotNull();
 
         authorRepository.deleteById(pushkin.get().getId());
 
         List<Author> after = authorRepository.findAll();
-        assertThat(after.size()).isEqualTo(2);
+        assertThat(after.size()).isEqualTo(initialAmount);
         assertThat(authorRepository.findById(pushkin.get().getId()).isPresent()).isFalse();
     }
 }

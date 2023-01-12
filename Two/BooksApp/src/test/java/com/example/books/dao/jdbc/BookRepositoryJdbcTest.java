@@ -28,11 +28,15 @@ class BookRepositoryJdbcTest {
 
     @Test
     void shouldReturnAllBooksList() {
+        final int foundAmount = 1;
+        final int initialAmount = 3;
+        final int genreAmount = 2;
+        final String isbn = "12345678";
         List<Book> bookList = bookRepository.findAll();
-        assertThat(bookList.size()).isEqualTo(3);
-        List<Book> fandorin = bookList.stream().filter(b -> "12345678".equals(b.getIsbn())).collect(Collectors.toList());
-        assertThat(fandorin.size()).isEqualTo(1);
-        assertThat(fandorin.get(0).getGenres().size()).isEqualTo(2);
+        assertThat(bookList.size()).isEqualTo(initialAmount);
+        List<Book> fandorin = bookList.stream().filter(b -> isbn.equals(b.getIsbn())).collect(Collectors.toList());
+        assertThat(fandorin.size()).isEqualTo(foundAmount);
+        assertThat(fandorin.get(0).getGenres().size()).isEqualTo(genreAmount);
     }
 
     @Test
@@ -44,16 +48,19 @@ class BookRepositoryJdbcTest {
         book.setIssueYear(1990);
         book.setGenres(new HashSet<>(Arrays.asList(new Genre(1L, "Fiction"), new Genre(2L, "Science"))));
 
+        final int initialAmount = 3;
+        final int finalAmount = 4;
+        final int genresAmount = 2;
         List<Book> before = bookRepository.findAll();
-        assertThat(before.size()).isEqualTo(3);
+        assertThat(before.size()).isEqualTo(initialAmount);
         assertThat(book.getId()).isNull();
         Optional<Book> added = bookRepository.add(book);
         assertThat(added).isPresent();
         assertThat(added.get().getId()).isNotNull();
         List<Book> after = bookRepository.findAll();
-        assertThat(after.size()).isEqualTo(4);
+        assertThat(after.size()).isEqualTo(finalAmount);
         List<Genre> genres = genreRepository.findByBookId(added.get().getId());
-        assertThat(genres.size()).isEqualTo(2);
+        assertThat(genres.size()).isEqualTo(genresAmount);
     }
 
     @Test
@@ -71,18 +78,20 @@ class BookRepositoryJdbcTest {
         } catch (Exception e) {
 
         }
+        final int finalAmount = 3;
         List<Book> after = bookRepository.findAll();
-        assertThat(after.size()).isEqualTo(3);
+        assertThat(after.size()).isEqualTo(finalAmount);
     }
 
     @Test
     void shouldDeleteBook() {
-        List<Genre> genresBefore = genreRepository.findByBookId(1);
+        final long bookId = 1;
+        List<Genre> genresBefore = genreRepository.findByBookId(bookId);
         assertThat(genresBefore.isEmpty()).isFalse();
-        assertThat(bookRepository.findById(1).isPresent()).isTrue();
-        bookRepository.delete(1);
-        assertThat(bookRepository.findById(1).isPresent()).isFalse();
-        List<Genre> genresAfter = genreRepository.findByBookId(1);
+        assertThat(bookRepository.findById(bookId).isPresent()).isTrue();
+        bookRepository.delete(bookId);
+        assertThat(bookRepository.findById(bookId).isPresent()).isFalse();
+        List<Genre> genresAfter = genreRepository.findByBookId(bookId);
         assertThat(genresAfter.isEmpty()).isTrue();
     }
 

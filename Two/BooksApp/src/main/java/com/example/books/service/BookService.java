@@ -7,5 +7,6 @@ public interface BookService {
     List<Book> findAll();
     Book findById(long id);
     Book add(Book book);
+    Book add(String title, String isbn, int issued, long authorId, String[] genreIds );
 }
 

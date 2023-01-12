@@ -103,9 +103,12 @@ public class BookRepositoryJdbc implements BookRepository {
                 "SELECT B.ID, TITLE, ISBN,ISSUE_YEAR, A.ID as AUTHOR_ID, A.NAME AS AUTHOR_NAME " +
                         "FROM BOOK B " +
                         "INNER JOIN AUTHOR A ON B.AUTHOR_ID = A.ID ";
-
         List<Book> books = jdbcTemplate.query(sql, new BooksRowMapper());
+        loadGenres(books);
+        return books;
+    }
 
+    private void loadGenres(List<Book> books) {
         Map<Long, Genre> genresById = genreRepository.findAll().stream().collect(Collectors.toMap(Genre::getId, Function.identity()));
         Map<Long, Book> booksById = books.stream().collect(Collectors.toMap(Book::getId, Function.identity()));
         List<BookGenreRelation> relations = findAllBookGenreRelations();
@@ -118,8 +121,6 @@ public class BookRepositoryJdbc implements BookRepository {
             }
             book.getGenres().add(genre);
         });
-
-        return books;
     }
 
     @Override
