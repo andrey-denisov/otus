@@ -1,47 +1,59 @@
 package com.example.books.dao.impl;
 
+import com.example.books.dao.BookCommentRepository;
+import com.example.books.model.Book;
 import com.example.books.model.BookComment;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
-@Transactional
-@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
+@SuppressWarnings("unused")
+@DataJpaTest
+@Import({BookCommentRepositoryJpa.class})
 class BookCommentRepositoryTest {
 
     @Autowired
-    private BookCommentRepositoryImpl bookCommentRepository;
-
+    private BookCommentRepository bookCommentRepository;
 
     @Test
-    void findById() {
-        BookComment result = bookCommentRepository.findById(1L);
-        assertEquals(1L, result.getId());
+    void shouldReturnCommentById() {
+        final long commentId = 1L;
+        Optional<BookComment> result = bookCommentRepository.findById(commentId);
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(commentId);
     }
 
     @Test
-    void findByBookId() {
-        List<BookComment> result = bookCommentRepository.findByBookId(3L);
-        assertEquals(1L, result.size());
+    void shouldReturnCommentsByBookId() {
+        final long bookId = 3L;
+        List<BookComment> result = bookCommentRepository.findByBookId(bookId);
+        assertThat(result).hasSize(1);
     }
 
     @Test
-    void create() {
-        BookComment result = bookCommentRepository.create(new BookComment(1L, "Very good book"));
-        BookComment found = bookCommentRepository.findById(result.getId());
-        assertEquals(result, found);
+    void shouldCreateComment() {
+        final long bookId = 1L;
+        Book book = new Book();
+        book.setId(bookId);
+        Optional<BookComment> result = bookCommentRepository.create(new BookComment(book, "Very good book"));
+        assertThat(result).isPresent();
+        Optional<BookComment> found = bookCommentRepository.findById(result.get().getId());
+        assertThat(found).isPresent();
+        assertThat(result.get()).isEqualTo(found.get());
     }
 
     @Test
-    void deleteById() {
-        BookComment deleted = bookCommentRepository.deleteById(1L);
-        assertNotNull(deleted);
-        BookComment found = bookCommentRepository.findById(1L);
-        assertNull(found);
+    void shouldDeleteCommentById() {
+        final long bookId = 1L;
+        final long commentId = 1L;
+        bookCommentRepository.deleteById(bookId);
+        Optional<BookComment> found = bookCommentRepository.findById(commentId);
+        assertThat(found).isNotPresent();
     }
 }

@@ -1,100 +1,118 @@
 package com.example.books.dao.impl;
 
+import com.example.books.dao.GenreRepository;
 import com.example.books.model.Genre;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 
 import javax.persistence.PersistenceException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
+@SuppressWarnings("unused")
 @DataJpaTest
-@ComponentScan
+@Import({GenreRepositoryJpa.class})
+//@Sql(scripts = {"/test-data.sql"}, config = @SqlConfig(encoding = "utf-8"))
 class GenreRepositoryTest {
 
     @Autowired
-    private GenreRepositoryImpl genreRepository;
+    private GenreRepository genreRepository;
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Test
-    public void findAll() {
+    public void shouldReturnAllTheGenresFromTheDatabase() {
+        final int initialGenreAmount = 4;
         List<Genre> result = genreRepository.findAll();
-        assertEquals(4, result.size());
+        assertThat(result).hasSize(initialGenreAmount);
     }
 
     @Test
-    public void findById() {
-        Genre result = genreRepository.findById(1L);
-        assertEquals(1L, result.getId());
+    public void shouldReturnSingleGenreById() {
+        final long genreId = 1L;
+        Optional<Genre> result = genreRepository.findById(genreId);
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(genreId);
     }
 
     @Test
-    public void findByBookId() {
-        Set<Genre> result = genreRepository.findByBookId(1L);
-        assertEquals(2L, result.size());
+    public void shouldReturnAllTheGenresByBookId() {
+        final long bookId = 1L;
+        final int expectedGenresAmount = 2;
+        Set<Genre> result = genreRepository.findByBookId(bookId);
+        assertThat(result).hasSize(expectedGenresAmount);
     }
 
     @Test
-    public void create() {
+    public void shouldCreateNewGenre() {
         Genre genre = new Genre("Love story");
-        Genre result = genreRepository.create(genre);
+        Optional<Genre> result = genreRepository.create(genre);
 
-        assertNotEquals(0, result.getId());
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isNotEqualTo(0);
 
-        Genre newOne = genreRepository.findById(result.getId());
-        assertEquals(genre.getName(), newOne.getName());
+        Optional<Genre> newOne = genreRepository.findById(result.get().getId());
+        assertThat(newOne).isPresent();
+        assertThat(genre.getName()).isEqualTo(newOne.get().getName());
     }
 
     @Test
-    public void update() {
+    public void shouldUpdateExistingGenre() {
         final String newName = "Science Fiction";
-        Genre genre = genreRepository.findById(1L);
-        assertNotEquals(newName, genre.getName());
+        final long genreId = 1L;
+        Optional<Genre> genre = genreRepository.findById(genreId);
+        assertThat(genre).isPresent();
+        assertThat(genre.get().getName()).isNotEqualTo(newName);
 
-        genre.setName(newName);
-        Genre result = genreRepository.update(genre);
-
-        Genre newOne = genreRepository.findById(result.getId());
-        assertEquals(genre.getId(), newOne.getId());
-        assertEquals(genre.getName(), newOne.getName());
+        genre.get().setName(newName);
+        Genre result = genreRepository.update(genre.get());
+        Optional<Genre> newOne = genreRepository.findById(result.getId());
+        assertThat(newOne).isPresent();
+        assertThat(genre.get()).isEqualTo(newOne.get());
     }
 
     @Test
-    void deleteById_Fail() {
-        Set<Genre> genresBefore = genreRepository.findByBookId(1L);
-        assertEquals(2, genresBefore.size());
+    void shouldFailWhenTryingToDeleteGenreBecauseOfIntegrityViolation() {
+        final long bookId = 1L;
+        final int initialGenresAmount = 2;
+        Set<Genre> genresBefore = genreRepository.findByBookId(bookId);
+        assertThat(genresBefore).hasSize(initialGenresAmount);
+
         long toDelete = genresBefore.iterator().next().getId();
 
-        assertThrows(PersistenceException.class, () -> {
+        assertThatThrownBy(() -> {
             genreRepository.deleteById(toDelete);
             entityManager.flush();
-        }, "PersistenceException was expected");
+        }, "PersistenceException was expected").isInstanceOf(PersistenceException.class);
 
         entityManager.clear();
         Set<Genre> genresAfter = genreRepository.findByBookId(1L);
-        assertEquals(2, genresBefore.size());
+        assertThat(genresBefore).hasSize(initialGenresAmount);
 
-        Genre genreAfter = genreRepository.findById(toDelete);
-        assertNotNull(genreAfter);
+        Optional<Genre> genreAfter = genreRepository.findById(toDelete);
+        assertThat(genreAfter).isPresent();
     }
 
     @Test
-    void deleteById_Ok() {
-        Genre genre = genreRepository.findAll().stream().filter(g -> g.getName().equals("Детская литература")).findFirst().get();
-        assertNotNull(genre);
-        long id = genre.getId();
+    void shouldSuccessfullyDeleteGenre() {
+        List<Genre> result = genreRepository.findAll();
+
+        Optional<Genre> genre = genreRepository.findAll().stream().filter(g -> new String(g.getName().getBytes(), StandardCharsets.UTF_8).equals("Детская литература")).findFirst();
+        assertThat(genre).isPresent();
+        long id = genre.get().getId();
         genreRepository.deleteById(id);
 
-        Genre after = genreRepository.findById(id);
-        assertNull(after);
+        Optional<Genre> after = genreRepository.findById(id);
+        assertThat(after).isNotPresent();
     }
-
-
 }

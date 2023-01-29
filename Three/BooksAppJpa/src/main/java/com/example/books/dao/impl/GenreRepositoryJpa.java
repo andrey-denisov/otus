@@ -5,13 +5,14 @@ import com.example.books.model.Genre;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
-import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 @Repository
-public class GenreRepositoryImpl implements GenreRepository {
+public class GenreRepositoryJpa implements GenreRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -23,8 +24,9 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public Genre findById(long id) {
-        return entityManager.find(Genre.class, id);
+    public Optional<Genre> findById(long id) {
+        Genre genre = entityManager.find(Genre.class, id);
+        return Optional.ofNullable(genre);
     }
 
     @Override
@@ -35,27 +37,21 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    @Transactional
-    public Genre create(Genre genre) {
+    public Optional<Genre> create(Genre genre) {
         entityManager.persist(genre);
-        return genre;
+        return Optional.ofNullable(genre);
     }
 
     @Override
-    @Transactional
     public Genre update(Genre genre) {
         entityManager.merge(genre);
         return genre;
     }
 
     @Override
-    @Transactional
-    public Genre deleteById(long id) {
-        Genre genre = findById(id);
-        if(null != genre) {
-            entityManager.remove(genre);
-        }
-        return genre;
+    public void deleteById(long id) {
+        Optional<Genre> genre = findById(id);
+        genre.ifPresent(value -> entityManager.remove(value));
     }
 
 }

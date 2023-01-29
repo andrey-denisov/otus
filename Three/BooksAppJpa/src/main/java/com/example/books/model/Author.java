@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+@SuppressWarnings("unused")
 @Entity
 public class Author {
 
@@ -21,6 +22,12 @@ public class Author {
     public Author(String name) {
         this.name = name;
     }
+
+    public Author(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
 
     public long getId() {
         return id;

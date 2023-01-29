@@ -10,9 +10,11 @@ import org.springframework.context.annotation.ComponentScan;
 
 import javax.persistence.PersistenceException;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
+@SuppressWarnings("unused")
 @DataJpaTest
 @ComponentScan
 class AuthorRepositoryTest {
@@ -24,66 +26,76 @@ class AuthorRepositoryTest {
     private TestEntityManager entityManager;
 
     @Test
-    public void findAll() {
+    public void shouldReturnAllAuthors() {
+        final int authorsAmount = 3;
         List<Author> result = authorRepository.findAll();
-        assertEquals(3, result.size());
+        assertThat(result).hasSize(authorsAmount);
     }
 
     @Test
-    public void findById() {
-        Author  result = authorRepository.findById(1L);
-        assertEquals(1L, result.getId());
+    public void shouldReturnAuthorById() {
+        final long authorId = 1L;
+        Optional<Author>  result = authorRepository.findById(authorId);
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(authorId);
     }
 
     @Test
-    public void create() {
+    public void shouldCreateAuthor() {
         Author author = new Author("Panaev");
-        Author result = authorRepository.create(author);
+        Optional<Author> result = authorRepository.create(author);
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isNotEqualTo(0);
 
-        assertNotEquals(0, result.getId());
-
-        Author newOne = authorRepository.findById(result.getId());
-        assertEquals(author.getName(), newOne.getName());
+        Optional<Author> newOne = authorRepository.findById(result.get().getId());
+        assertThat(newOne).isPresent();
+        assertThat(author.getName()).isEqualTo(newOne.get().getName());
     }
 
-
     @Test
-    public void update() {
+    public void shouldUpdateAuthor() {
         final String newName = "Skubichevskiy";
-        Author author = authorRepository.findById(1L);
-        assertNotEquals(newName, author.getName());
+        Optional<Author> author = authorRepository.findById(1L);
+        assertThat(author).isPresent();
+        assertThat(newName).isNotEqualTo(author.get().getName());
 
-        author.setName(newName);
-        Author result = authorRepository.update(author);
+        author.get().setName(newName);
+        Author result = authorRepository.update(author.get());
 
-        Author newOne = authorRepository.findById(result.getId());
-        assertEquals(author.getId(), newOne.getId());
-        assertEquals(author.getName(), newOne.getName());
+        Optional<Author> newOne = authorRepository.findById(result.getId());
+        assertThat(newOne).isPresent();
+        assertThat(author.get().getId()).isEqualTo(newOne.get().getId());
+        assertThat(author.get().getName()).isEqualTo(newOne.get().getName());
     }
 
     @Test
-    void deleteBydIFail() {
+    void shouldFailWhenTryingToDeleteAuthorBydI() {
+        final int authorsAmount = 3;
+        final long authorId = 1L;
         List<Author> before = authorRepository.findAll();
-        assertEquals(3, before.size());
-        assertThrows(PersistenceException.class, () -> {
-            authorRepository.deleteById(1L);
-            entityManager.flush();
-        }, "PersistenceException was expected");
+        assertThat(before).hasSize(authorsAmount);
+        assertThatThrownBy(() -> {
+                    authorRepository.deleteById(1L);
+                    entityManager.flush();
+                }, "PersistenceException was expected"
+        ).isInstanceOf(PersistenceException.class);
     }
 
     @Test
-    void deleteBydOk() {
-        Author pushkin = authorRepository.create(new Author("Pushkin"));
+    void shouldDeleteAuthorByd() {
+        final int initialAuthorsAmount = 4;
+        final int finalAuthorsAmount = 3;
+        Optional<Author> pushkin = authorRepository.create(new Author("Pushkin"));
+        assertThat(pushkin).isPresent();
         List<Author> before = authorRepository.findAll();
-        assertEquals(4, before.size());
-        assertNotNull(authorRepository.findById(pushkin.getId()));
+        assertThat(before).hasSize(initialAuthorsAmount);
+        assertThat(authorRepository.findById(pushkin.get().getId())).isPresent();
 
-        authorRepository.deleteById(pushkin.getId());
+        authorRepository.deleteById(pushkin.get().getId());
         entityManager.flush();
 
         List<Author> after = authorRepository.findAll();
-        assertEquals(3, after.size());
-        assertNull(authorRepository.findById(pushkin.getId()));
+        assertThat(after).hasSize(finalAuthorsAmount);
+        assertThat(authorRepository.findById(pushkin.get().getId())).isNotPresent();
     }
-
 }

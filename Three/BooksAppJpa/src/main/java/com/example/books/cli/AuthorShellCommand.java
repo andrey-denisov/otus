@@ -1,33 +1,34 @@
 package com.example.books.cli;
 
-import com.example.books.dao.impl.AuthorRepositoryImpl;
 import com.example.books.model.Author;
+import com.example.books.service.AuthorService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.util.CollectionUtils;
 
+@SuppressWarnings("unused")
+@RequiredArgsConstructor
 @ShellComponent
 public class AuthorShellCommand {
 
     private final Logger logger = LoggerFactory.getLogger(AuthorShellCommand.class);
 
-    private final AuthorRepositoryImpl authorRepository;
-
-    public AuthorShellCommand(AuthorRepositoryImpl authorRepository) {
-        this.authorRepository = authorRepository;
-    }
+    private final AuthorService authorService;
 
     @ShellMethod(value = "list authors", key="list-authors")
     public String listAuthors() {
         try {
-            List<Author> authorList = authorRepository.findAll();
+            List<Author> authorList = authorService.findAll();
 
-            if (null == authorList || authorList.isEmpty()) {
+            if (CollectionUtils.isEmpty(authorList)) {
                 return "No authors found";
             }
             return authorList.toString();
@@ -40,9 +41,9 @@ public class AuthorShellCommand {
     @ShellMethod(value = "find author by id", key="author-by-id")
     public String authorById(long id) {
         try {
-            Author author = authorRepository.findById(id);
+            Author author = authorService.findById(id);
 
-            if (null == author) {
+            if (Objects.isNull(author)) {
                 return "No authors found";
             }
             return author.toString();
@@ -55,11 +56,10 @@ public class AuthorShellCommand {
     @ShellMethod(value = "delete author by id", key="delete-author-by-id")
     public String deleteById(long id) {
         try {
-            Author author = authorRepository.deleteById(id);
-            return MessageFormat.format("Author {0} was deleted", author);
+            authorService.deleteById(id);
+            return MessageFormat.format("Author with id {0} was deleted", id);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return "Cannot delete author with id=" + id + ": " + e.getMessage();
+            return "Cannot delete author with id=" + id;
         }
     }
 
