@@ -7,42 +7,38 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("unused")
 @Repository
-public class BookCommentRepositoryImpl implements BookCommentRepository {
+public class BookCommentRepositoryJpa implements BookCommentRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public BookComment findById(long id) {
-        return entityManager.find(BookComment.class, id);
+    public Optional<BookComment> findById(long id) {
+        return Optional.ofNullable(entityManager.find(BookComment.class, id));
     }
 
     @Override
     public List<BookComment> findByBookId(long bookId) {
-        TypedQuery<BookComment> query = entityManager.createQuery("SELECT c FROM BookComment c WHERE c.bookId=:bookId", BookComment.class);
+        TypedQuery<BookComment> query = entityManager.createQuery("SELECT c FROM BookComment c WHERE book.id=:bookId", BookComment.class);
         query.setParameter("bookId", bookId);
         return query.getResultList();
     }
 
     @Override
-    @Transactional
-    public BookComment create(BookComment comment) {
+    public Optional<BookComment> create(BookComment comment) {
         entityManager.persist(comment);
-        return comment;
+        return Optional.ofNullable(comment);
     }
 
     @Override
-    @Transactional
-    public BookComment deleteById(long id) {
-        BookComment comment = findById(id);
-        if(null != comment) {
-            entityManager.remove(comment);
-        }
-        return comment;
+    public void deleteById(long id) {
+        Optional<BookComment> comment = findById(id);
+        comment.ifPresent(bookComment -> entityManager.remove(bookComment));
     }
 
 }

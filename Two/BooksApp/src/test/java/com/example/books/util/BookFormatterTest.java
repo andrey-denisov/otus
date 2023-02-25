@@ -24,12 +24,12 @@ class BookFormatterTest {
             add(new Genre(2, "Жанр 2"));
         }});
 
-        String formatted = new BookFormatter().format(book);
-        assertEquals("id:1\n" +
-                "Title:Название\n" +
-                "ISBN:12345\n" +
-                "Author:Author{id=1, name='Автор'}\n" +
-                "Issued:1990\n" +
-                "Genre:Genre{id=1, name='Жанр 1'}Genre{id=2, name='Жанр 2'}", formatted);
+        String formatted = new BookFormatter(new AuthorFormatter(), new GenreFormatter()).format(book);
+        assertEquals("------ Book ------\nid: 1\n" +
+                "Title: Название\n" +
+                "ISBN: 12345\n" +
+                "Author: id: 1, name: Автор\n" +
+                "Issued: 1990\n" +
+                "Genres: [id: 1, name: Жанр 1; id: 2, name: Жанр 2]", formatted);
     }
 }

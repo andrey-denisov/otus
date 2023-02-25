@@ -1,41 +1,41 @@
-create table if not exists author
+CREATE TABLE IF NOT EXISTS AUTHOR
 (
-    id bigint auto_increment primary key,
-    name varchar(200) not null UNIQUE
+    ID BIGINT AUTO_INCREMENT PRIMARY KEY,
+    NAME VARCHAR(200) NOT NULL UNIQUE
 );
 
-create table if not exists book
+CREATE TABLE IF NOT EXISTS BOOK
 (
-    id         bigint auto_increment primary key,
-    title      varchar(100) not null,
-    isbn       varchar(50)  not null,
-    issue_year smallint     not null,
-    author_id  bigint       not null
+    ID         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    TITLE      VARCHAR(100) NOT NULL,
+    ISBN       VARCHAR(50)  NOT NULL,
+    ISSUE_YEAR SMALLINT     NOT NULL,
+    AUTHOR_ID  BIGINT       NOT NULL
 );
 
-ALTER TABLE book ADD CONSTRAINT book_author_id_fk foreign key (author_id) references author(id) ON DELETE NO ACTION;
+ALTER TABLE BOOK ADD CONSTRAINT BOOK_AUTHOR_ID_FK FOREIGN KEY (AUTHOR_ID) REFERENCES AUTHOR(ID) ON DELETE NO ACTION;
 
 
-create table if not exists genre
+CREATE TABLE IF NOT EXISTS GENRE
 (
-    id   bigint auto_increment
-        constraint genre_pk primary key,
-    name varchar(200) not null
+    ID   BIGINT AUTO_INCREMENT
+        CONSTRAINT GENRE_PK PRIMARY KEY,
+    NAME VARCHAR(200) NOT NULL
 );
 
-create unique index if not exists author_name_u1 on author (name);
+CREATE UNIQUE INDEX IF NOT EXISTS AUTHOR_NAME_U1 ON AUTHOR (NAME);
 
-create table if not exists book_genre
+CREATE TABLE IF NOT EXISTS BOOK_GENRE
 (
-    id       bigint auto_increment primary key,
-    book_id  integer not null constraint book_id_fk references book on delete no action on delete cascade,
-    genre_id integer not null constraint genre_id_fk references genre on delete no action
+    ID       BIGINT AUTO_INCREMENT PRIMARY KEY,
+    BOOK_ID  INTEGER NOT NULL CONSTRAINT BOOK_ID_FK REFERENCES BOOK ON DELETE CASCADE,
+    GENRE_ID INTEGER NOT NULL CONSTRAINT GENRE_ID_FK REFERENCES GENRE ON DELETE NO ACTION
 );
 
-create table if not exists book_comment
+CREATE TABLE IF NOT EXISTS BOOK_COMMENT
 (
-    id      bigint auto_increment primary key,
-    book_id integer      not null  constraint comment_book_id_fk references book on delete no action,
-    comment varchar(500) not null
+    ID      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    BOOK_ID INTEGER      NOT NULL  CONSTRAINT COMMENT_BOOK_ID_FK REFERENCES BOOK ON DELETE NO ACTION,
+    COMMENT VARCHAR(500) NOT NULL
 );
 

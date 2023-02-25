@@ -1,9 +1,13 @@
 package com.example.books.model;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
+@NoArgsConstructor
+@AllArgsConstructor
 public class Book {
     private Long id;
     private Author author;

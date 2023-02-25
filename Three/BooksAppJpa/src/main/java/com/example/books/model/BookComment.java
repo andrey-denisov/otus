@@ -1,13 +1,12 @@
 package com.example.books.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import java.util.Objects;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+@SuppressWarnings("unused")
 @Entity
 public class BookComment {
 
@@ -15,14 +14,15 @@ public class BookComment {
     @GeneratedValue(strategy = IDENTITY)
     private long id;
 
-    private long bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Book book;
     private String comment;
 
     protected BookComment() {
     }
 
-    public BookComment(long bookId, String comment) {
-        this.bookId = bookId;
+    public BookComment(Book book, String comment) {
+        this.book = book;
         this.comment = comment;
     }
 
@@ -30,8 +30,8 @@ public class BookComment {
         return id;
     }
 
-    public long getBookId() {
-        return bookId;
+    public Book getBook() {
+        return book;
     }
 
     public String getComment() {
@@ -44,12 +44,12 @@ public class BookComment {
         if (o == null || getClass() != o.getClass()) return false;
         BookComment comment1 = (BookComment) o;
         return id == comment1.id &&
-                bookId == comment1.bookId &&
+                book == comment1.book &&
                 Objects.equals(comment, comment1.comment);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, bookId, comment);
+        return Objects.hash(id, book, comment);
     }
 }

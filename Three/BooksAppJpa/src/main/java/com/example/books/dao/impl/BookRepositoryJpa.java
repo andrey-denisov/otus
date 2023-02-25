@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("unused")
 @Repository
-public class BookRepositoryImpl implements BookRepository {
+public class BookRepositoryJpa implements BookRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -24,29 +25,23 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public Book findById(long id) {
-        return entityManager.find(Book.class, id);
+    public Optional<Book> findById(long id) {
+        return Optional.ofNullable(entityManager.find(Book.class, id));
     }
 
     @Override
-    @Transactional
-    public Book create(Book book) {
+    public Optional<Book> create(Book book) {
         entityManager.persist(book);
-        return book;
+        return Optional.ofNullable(book);
     }
 
     @Override
-    @Transactional
-    public Book deleteById(long id) {
-        Book book = findById(id);
-        if(null != book) {
-            entityManager.remove(book);
-        }
-        return book;
+    public void deleteById(long id) {
+        Optional<Book> book = findById(id);
+        book.ifPresent(value -> entityManager.remove(value));
     }
 
     @Override
-    @Transactional
     public Book update(Book book) {
         entityManager.merge(book);
         return book;

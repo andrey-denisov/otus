@@ -5,13 +5,14 @@ import com.example.books.model.Genre;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
-import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 @Repository
-public class GenreRepositoryImpl implements GenreRepository {
+public class GenreRepositoryJpa implements GenreRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -23,39 +24,34 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public Genre findById(long id) {
-        return entityManager.find(Genre.class, id);
+    public Optional<Genre> findById(long id) {
+        Genre genre = entityManager.find(Genre.class, id);
+        return Optional.ofNullable(genre);
     }
 
     @Override
     public Set<Genre> findByBookId(long bookId) {
-        Query nativeQuery = entityManager.createNativeQuery("SELECT G.ID AS ID, NAME FROM GENRE G INNER JOIN BOOK_GENRE BG ON G.ID = BG.GENRE_ID WHERE BG.BOOK_ID=:bookId", Genre.class);
-        nativeQuery.setParameter("bookId", bookId);
-        return new HashSet<>(nativeQuery.getResultList());
+        TypedQuery<Genre> query = entityManager.createQuery("SELECT g FROM Book b INNER JOIN b.genres g WHERE b.id=:bookId", Genre.class);
+        query.setParameter("bookId", bookId);
+        return new HashSet<>(query.getResultList());
     }
 
     @Override
-    @Transactional
-    public Genre create(Genre genre) {
+    public Optional<Genre> create(Genre genre) {
         entityManager.persist(genre);
-        return genre;
+        return Optional.ofNullable(genre);
     }
 
     @Override
-    @Transactional
     public Genre update(Genre genre) {
         entityManager.merge(genre);
         return genre;
     }
 
     @Override
-    @Transactional
-    public Genre deleteById(long id) {
-        Genre genre = findById(id);
-        if(null != genre) {
-            entityManager.remove(genre);
-        }
-        return genre;
+    public void deleteById(long id) {
+        Optional<Genre> genre = findById(id);
+        genre.ifPresent(value -> entityManager.remove(value));
     }
 
 }

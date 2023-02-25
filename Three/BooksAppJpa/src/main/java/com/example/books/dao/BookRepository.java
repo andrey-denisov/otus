@@ -1,21 +1,20 @@
 package com.example.books.dao;
 
 import com.example.books.model.Book;
+import org.springframework.data.jpa.repository.EntityGraph;
 
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookRepository {
+    @EntityGraph(attributePaths = {"genres", "comments"})
     List<Book> findAll();
 
-    Book findById(long id);
+    Optional<Book> findById(long id);
 
-    @Transactional
-    Book create(Book book);
+    Optional<Book> create(Book book);
 
-    @Transactional
-    Book deleteById(long id);
+    void deleteById(long id);
 
-    @Transactional
     Book update(Book book);
 }

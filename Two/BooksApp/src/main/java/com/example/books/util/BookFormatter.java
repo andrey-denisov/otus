@@ -1,22 +1,27 @@
 package com.example.books.util;
 
 import com.example.books.model.Book;
-import com.example.books.model.Genre;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
+@RequiredArgsConstructor
+@Component
 public class BookFormatter implements Formatter<Book>{
+    private final AuthorFormatter authorFormatter;
+    private final GenreFormatter genreFormatter;
+
     @Override
     public String format(Book value) {
-        StringBuilder sb = new StringBuilder()
-                .append("id:").append(value.getId()).append("\n")
-                .append("Title:").append(value.getTitle()).append("\n")
-                .append("ISBN:").append(value.getIsbn()).append("\n")
-                .append("Author:").append(value.getAuthor()).append("\n")
-                .append("Issued:").append(value.getIssueYear()).append("\n");
-
-        sb.append("Genre:");
-        for(Genre g : value.getGenres()) {
-            sb.append(g);
-        }
-        return sb.toString();
+        return String.format(
+                "------ Book ------\nid: %s\nTitle: %s\nISBN: %s\nAuthor: %s\nIssued: %s\nGenres: [%s]",
+                value.getId(),
+                value.getTitle(),
+                value.getIsbn(),
+                authorFormatter.format(value.getAuthor()),
+                value.getIssueYear(),
+                ListFormatter.format(new ArrayList<>(value.getGenres()), genreFormatter, "; ")
+                );
     }
 }

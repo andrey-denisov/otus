@@ -1,12 +1,17 @@
 package com.example.books.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import javax.persistence.*;
 import java.util.Objects;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+@SuppressWarnings("unused")
+@BatchSize(size=25)
 @Entity
 public class Author {
 
@@ -15,12 +20,21 @@ public class Author {
     private long id;
     private String name;
 
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Book> books;
     protected Author() {
     }
 
     public Author(String name) {
         this.name = name;
     }
+
+    public Author(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
 
     public long getId() {
         return id;

@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("unused")
 @Repository
-public class AuthorRepositoryImpl implements AuthorRepository {
+public class AuthorRepositoryJpa implements AuthorRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -21,29 +22,22 @@ public class AuthorRepositoryImpl implements AuthorRepository {
         return query.getResultList();
     }
 
-    public Author findById(long id) {
-        return entityManager.find(Author.class, id);
+    public Optional<Author> findById(long id) {
+        return Optional.ofNullable(entityManager.find(Author.class, id));
     }
 
-    @Transactional
-    public Author create(Author author) {
+    public Optional<Author> create(Author author) {
         entityManager.persist(author);
-        return author;
+        return Optional.ofNullable(author);
     }
 
-    @Transactional
     public Author update(Author author) {
         entityManager.merge(author);
         return author;
     }
 
-    @Transactional
-    public Author deleteById(long id) {
-        Author author = findById(id);
-        if(null != author) {
-            entityManager.remove(author);
-        }
-        return author;
+    public void deleteById(long id) {
+        Optional<Author> author = findById(id);
+        author.ifPresent(value -> entityManager.remove(value));
     }
-
 }
