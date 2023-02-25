@@ -1,9 +1,6 @@
 package com.example.books.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import java.util.Objects;
 
@@ -17,7 +14,7 @@ public class BookComment {
     @GeneratedValue(strategy = IDENTITY)
     private long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Book book;
     private String comment;
 

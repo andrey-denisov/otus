@@ -2,6 +2,7 @@ package com.example.books.service.impl;
 
 import com.example.books.dao.AuthorRepository;
 import com.example.books.dao.BookRepository;
+import com.example.books.dao.GenreRepository;
 import com.example.books.model.Book;
 import com.example.books.model.Genre;
 import com.example.books.service.BookPresentationService;
@@ -22,7 +23,7 @@ public class BookPresentationServiceImpl implements BookPresentationService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
-    private final com.example.books.dao.GenreRepository genreRepository;
+    private final GenreRepository genreRepository;
 
     @Transactional
     @Override

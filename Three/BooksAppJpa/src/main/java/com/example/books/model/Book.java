@@ -14,7 +14,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(targetEntity = Author.class)
+    @ManyToOne
     @JoinColumn(name="author_id")
     private Author author;
     private String title;
@@ -95,17 +95,12 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return issueYear == book.issueYear &&
-                Objects.equals(id, book.id) &&
-                Objects.equals(author, book.author) &&
-                Objects.equals(title, book.title) &&
-                Objects.equals(isbn, book.isbn) &&
-                Objects.equals(genres, book.genres);
+        return Objects.equals(isbn, book.isbn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, author, title, issueYear, isbn, genres);
+        return Objects.hash(isbn);
     }
 
     @Override

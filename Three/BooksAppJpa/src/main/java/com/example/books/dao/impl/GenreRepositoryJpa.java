@@ -31,9 +31,9 @@ public class GenreRepositoryJpa implements GenreRepository {
 
     @Override
     public Set<Genre> findByBookId(long bookId) {
-        Query nativeQuery = entityManager.createNativeQuery("SELECT G.ID AS ID, NAME FROM GENRE G INNER JOIN BOOK_GENRE BG ON G.ID = BG.GENRE_ID WHERE BG.BOOK_ID=:bookId", Genre.class);
-        nativeQuery.setParameter("bookId", bookId);
-        return new HashSet<>(nativeQuery.getResultList());
+        TypedQuery<Genre> query = entityManager.createQuery("SELECT g FROM Book b INNER JOIN b.genres g WHERE b.id=:bookId", Genre.class);
+        query.setParameter("bookId", bookId);
+        return new HashSet<>(query.getResultList());
     }
 
     @Override
